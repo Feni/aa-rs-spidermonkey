@@ -4,6 +4,13 @@ version = "0.1.0"
 authors = ["Feni <feni727@gmail.com>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+serde_derive = "1.0.101"
+serde = "1.0.101"
+futures = "0.1.29" 
+http = "0.1.18"
+url = "2.1.0"
+serde_json = "1.0.40"
+actix-web = "1.0.7"
+actix-files = "0.1.4"
