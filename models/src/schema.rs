@@ -12,17 +12,21 @@ table! {
 table! {
     routes (id) {
         id -> Int4,
-        app_id -> Nullable<Int4>,
+        app_id -> Int4,
         name -> Nullable<Varchar>,
+        raw -> Varchar,
         pattern -> Varchar,
-        view_id -> Nullable<Int4>,
+        method_get -> Bool,
+        method_post -> Bool,
+        extra_methods -> Nullable<Array<Int2>>,
+        view_id -> Int4,
     }
 }
 
 table! {
     views (id) {
         id -> Int4,
-        app_id -> Nullable<Int4>,
+        app_id -> Int4,
         name -> Varchar,
         kind -> Int2,
         content_url -> Nullable<Varchar>,

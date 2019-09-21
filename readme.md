@@ -35,7 +35,10 @@ psql --user aasm --password -d aasmdb --host localhost
 
 ```
 
+Diesel ORM
 ```
 diesel setup
 diesel migration generate create_routes
-diesel migration generate create_views
+diesel migration run
+```
+
