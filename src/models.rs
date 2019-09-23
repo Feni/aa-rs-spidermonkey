@@ -1,4 +1,5 @@
-use diesel::types::Timestamp;
+use std::time::SystemTime;
+use crate::schema::*;
 
 #[derive(Identifiable, Queryable, PartialEq, Debug)]
 //#[table_name = "apps"]
@@ -8,8 +9,8 @@ pub struct App {
     pub domain: String,
     pub environment: u16,
     
-    pub created_at: Timestamp,
-    pub updated_at: Timestamp,
+    pub created_at: SystemTime,
+    pub updated_at: SystemTime,
 }
 
 #[derive(Identifiable, Queryable, PartialEq, Debug, Associations)]
@@ -23,8 +24,8 @@ pub struct View {
     pub content_url: Option<String>,
     pub content: Option<String>,
     
-    pub created_at: Timestamp,
-    pub updated_at: Timestamp,
+    pub created_at: SystemTime,
+    pub updated_at: SystemTime,
 }
 
 #[derive(Identifiable, Queryable, PartialEq, Debug, Associations)]
@@ -41,7 +42,7 @@ pub struct Route {
 
     pub view_id: i32,
     
-    pub created_at: Timestamp,
-    pub updated_at: Timestamp,
+    pub created_at: SystemTime,
+    pub updated_at: SystemTime,
 }
 

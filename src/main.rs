@@ -1,7 +1,14 @@
+#[macro_use]
+extern crate diesel;
+extern crate dotenv;
+
 use actix_files as fs;
 use actix_files::NamedFile;
 use actix_web::{web, App, HttpRequest, HttpServer, Responder, HttpResponse};
 
+pub mod schema;
+pub mod models;
+pub mod services;
 
 fn landing(_req: HttpRequest) -> actix_web::Result<NamedFile> {
     // let path: PathBuf = req.match_info().query("filename").parse().unwrap();
