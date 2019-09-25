@@ -5,7 +5,7 @@ use crate::schema::*;
 //#[table_name = "apps"]
 pub struct App {
     pub id: i32,
-    pub name: String,
+    pub app_name: String,
     pub domain: String,
     pub environment: u16,
     
@@ -18,31 +18,30 @@ pub struct App {
 pub struct View {
     pub id: i32,
     pub app_id: i32,
-    pub name: String,
-    pub kind: i16,
+    pub view_name: Option<String>,
 
-    pub content_url: Option<String>,
+    pub mime_type: String,
+    pub asset_url: Option<String>,
     pub content: Option<String>,
     
     pub created_at: SystemTime,
     pub updated_at: SystemTime,
 }
 
+
 #[derive(Identifiable, Queryable, PartialEq, Debug, Associations)]
 pub struct Route {
     pub id: i32,
     pub app_id: i32, 
-    pub name: Option<String>,
-    pub raw: String,
+    pub route_name: Option<String>,
+    
     pub pattern: String,
+    pub pattern_regex: String,
 
     pub method_get: bool, 
     pub method_post: bool, 
     pub extra_methods: Option<Vec<u16>>,
 
-    pub view_id: i32,
-    
-    pub created_at: SystemTime,
-    pub updated_at: SystemTime,
+    pub view_id: i32
 }
 
