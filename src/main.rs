@@ -54,9 +54,13 @@ fn hello_world(req: Request<Body>) -> Response<Body> {
     let method = req.method().to_string();
     let path = req.uri().path().to_string();
 
-    resolve(method, host, path);
-
-    Response::new(Body::from(PHRASE))
+    let maybe_view = resolve(method, host, path);
+    if let Some(view) = maybe_view {
+        Response::new(Body::from(view.content.unwrap()))
+    } else {
+        Response::new(Body::from("Not Found"))
+    }
+    
 
 }
 

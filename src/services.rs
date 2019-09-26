@@ -21,7 +21,7 @@ pub fn establish_connection() -> PgConnection {
         .expect(&format!("Error connecting to {}", database_url))
 }
 
-pub fn resolve(q_method: String, q_host: String, q_path: String) {
+pub fn resolve(q_method: String, q_host: String, q_path: String) -> Option<View> {
     // use schema::apps::dsl::*;
     // use schema::routes::dsl::*;
     // use schema::views::dsl::*;
@@ -45,7 +45,7 @@ pub fn resolve(q_method: String, q_host: String, q_path: String) {
     //     .limit(1)
     //     //.load::<View>(&pg_conn)
     //     .expect("Error loading apps");
-    let results: Vec<(View, Route)> = View::belonging_to(&app_filter).inner_join(
+    let mut results: Vec<(View, Route)> = View::belonging_to(&app_filter).inner_join(
             routes::table.on(
                 views::id.eq(routes::view_id).and(
                     routes::pattern.eq(q_path)
@@ -64,4 +64,11 @@ pub fn resolve(q_method: String, q_host: String, q_path: String) {
     // .get_results(&pg_conn);
 
     println!("PG result {:?}", results);
+    
+    if results.len() > 0 {
+        let result = results.pop().unwrap();
+        return Some(result.0);
+    }
+
+    return None;
 }
