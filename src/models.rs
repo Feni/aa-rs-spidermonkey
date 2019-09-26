@@ -7,7 +7,7 @@ pub struct App {
     pub id: i32,
     pub app_name: String,
     pub domain: String,
-    pub environment: u16,
+    pub environment: i16,
     
     pub created_at: SystemTime,
     pub updated_at: SystemTime,
@@ -30,6 +30,7 @@ pub struct View {
 
 
 #[derive(Identifiable, Queryable, PartialEq, Debug, Associations)]
+#[belongs_to(App, Route)]
 pub struct Route {
     pub id: i32,
     pub app_id: i32, 
@@ -40,7 +41,7 @@ pub struct Route {
 
     pub method_get: bool, 
     pub method_post: bool, 
-    pub extra_methods: Option<Vec<u16>>,
+    pub extra_methods: Option<Vec<i16>>,
 
     pub view_id: i32
 }

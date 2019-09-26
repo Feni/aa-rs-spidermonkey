@@ -3,11 +3,13 @@ extern crate diesel;
 extern crate dotenv;
 extern crate hyper;
 
+#[macro_use]
 pub mod schema;
 pub mod models;
 pub mod services;
 
 
+use crate::services::resolve;
 use crate::services::establish_connection;
 use hyper::{Body, Request, Response, Server};
 use hyper::rt::{self, Future};
@@ -48,10 +50,11 @@ fn hello_world(req: Request<Body>) -> Response<Body> {
     println!("Request {:?}", req);
     println!("uri {:?}", req.uri());
 
-    let host = req.headers().get("host");
-    let method = req.method();
-    let path = req.uri().path();
+    let host = req.headers().get("host").unwrap().to_str().unwrap().to_string();
+    let method = req.method().to_string();
+    let path = req.uri().path().to_string();
 
+    resolve(method, host, path);
 
     Response::new(Body::from(PHRASE))
 
