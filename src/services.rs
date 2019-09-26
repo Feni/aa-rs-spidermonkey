@@ -11,6 +11,9 @@ use diesel::result::Error as err;
 use crate::schema;
 use crate::models::*;
 
+use hyper::header;
+use hyper::{Body, Request, Response, Server};
+
 
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
@@ -33,37 +36,17 @@ pub fn resolve(q_method: String, q_host: String, q_path: String) -> Option<View>
     let pg_conn = establish_connection();
 
     let app_filter = apps::table.filter(apps::domain.eq(host_lower)).first::<App>(&pg_conn).unwrap();
-    // let route_filter = Route::belonging_to(&app_filter).filter(pattern.eq(q_path)).first::<Route>(&pg_conn).unwrap();
-    // let results = View::belonging_to(&app_filter)
-    //     .inner_join(
-    //         routes::table.on(
-    //             views::id.eq(routes::view_id).and(
-    //                 routes::pattern.eq(q_path)
-    //             )
-    //         )
-    //     )
-    //     .limit(1)
-    //     //.load::<View>(&pg_conn)
-    //     .expect("Error loading apps");
     let mut results: Vec<(View, Route)> = View::belonging_to(&app_filter).inner_join(
-            routes::table.on(
-                views::id.eq(routes::view_id).and(
-                    routes::pattern.eq(q_path)
-                )
+        routes::table.on(
+            views::id.eq(routes::view_id).and(
+                routes::pattern.eq(q_path)
             )
+        )
     ).limit(1)
     .load(&pg_conn)
     .expect("Error loading apps");
 
-    // let views: Result<Vec<View>, err> = sql_query("select * from views 
-    // inner join routes on views.id = routes.view_id 
-    // inner join apps on routes.app_id = apps.id 
-    // where apps.\"domain\" = ? and routes.pattern = ?;")
-    // .bind::<Text, _>(host_lower)
-    // .bind::<Text, _>(q_path)
-    // .get_results(&pg_conn);
-
-    println!("PG result {:?}", results);
+    // println!("PG result {:?}", results);
     
     if results.len() > 0 {
         let result = results.pop().unwrap();
@@ -71,4 +54,19 @@ pub fn resolve(q_method: String, q_host: String, q_path: String) -> Option<View>
     }
 
     return None;
+}
+
+pub fn dispatch(view: View) -> Response<Body> {
+    if view.mime_type == "text/html" {
+        let mut response = Response::new(Body::from(view.content.unwrap()));
+        response.headers_mut().insert(header::CONTENT_TYPE, "text/html; charset=UTF-8".parse().unwrap());
+        return response;
+    } else if view.mime_type == "application/javascript" {
+        let mut response = Response::new(Body::from("JS"));
+        return response;
+    } else {
+        // Should not happen
+        let mut response = Response::new(Body::from("AppAssembly Server Error"));
+        return response;
+    }
 }

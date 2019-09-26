@@ -9,11 +9,11 @@ pub mod models;
 pub mod services;
 
 
-use crate::services::resolve;
-use crate::services::establish_connection;
+use crate::services::{resolve, dispatch, establish_connection};
 use hyper::{Body, Request, Response, Server};
 use hyper::rt::{self, Future};
 use hyper::service::service_fn_ok;
+use hyper::StatusCode;
 
 // fn landing(_req: HttpRequest) -> actix_web::Result<NamedFile> {
 //     // let path: PathBuf = req.match_info().query("filename").parse().unwrap();
@@ -56,9 +56,12 @@ fn hello_world(req: Request<Body>) -> Response<Body> {
 
     let maybe_view = resolve(method, host, path);
     if let Some(view) = maybe_view {
-        Response::new(Body::from(view.content.unwrap()))
+        return dispatch(view);
     } else {
-        Response::new(Body::from("Not Found"))
+        let mut response = Response::new(Body::from("Not Found"));
+        //let status = resp.status_mut();
+        *response.status_mut() = StatusCode::NOT_FOUND;
+        return response;
     }
     
 
