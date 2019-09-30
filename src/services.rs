@@ -1,25 +1,53 @@
 use actix_web::{HttpRequest, Responder, http::StatusCode};
 use diesel::query_builder::functions::sql_query;
 use diesel::prelude::*;
-use diesel::pg::PgConnection;
+// use diesel::pg::PgConnection;
 use dotenv::dotenv;
 use std::env;
+use diesel::prelude::*;
 use diesel::sql_types::Text;
 use diesel::result::Error as err;
+use diesel::r2d2::{self, ConnectionManager};
+use actix_web::web::Data;
 
 use crate::schema;
 use crate::models::*;
 use crate::js::exec_js;
+use std::sync::Arc;
+use mozjs::rust::JSEngine;
 
 
-pub fn establish_connection() -> PgConnection {
+
+
+#[derive(Clone)]
+pub struct AasmState {
+    pub js: Arc<JSEngine>,
+    pub id: i32,
+    pub conn: DBPool
+}
+
+
+pub type DBPool = r2d2::Pool<ConnectionManager<PgConnection>>;
+pub type AasmData = Data<AasmState>;
+
+pub fn establish_connection() -> DBPool {
     dotenv().ok();
 
     let database_url = env::var("DATABASE_URL")
         .expect("DATABASE_URL must be set");
-    PgConnection::establish(&database_url)
-        .expect(&format!("Error connecting to {}", database_url))
+    let manager = ConnectionManager::<PgConnection>::new(database_url);
+
+    // PgConnection::establish(&database_url)
+    //     .expect(&format!("Error connecting to {}", database_url))
+
+    let pool = r2d2::Pool::builder()
+        .build(manager)
+        .expect("Failed to create pool.");
+
+    return pool;
+
 }
+
 
 pub fn resolve(q_method: String, q_host: String, q_path: String) -> Option<View> {
     // use schema::apps::dsl::*;
@@ -32,23 +60,23 @@ pub fn resolve(q_method: String, q_host: String, q_path: String) -> Option<View>
 
     let pg_conn = establish_connection();
 
-    let app_filter = apps::table.filter(apps::domain.eq(host_lower)).first::<App>(&pg_conn).unwrap();
-    let mut results: Vec<(View, Route)> = View::belonging_to(&app_filter).inner_join(
-        routes::table.on(
-            views::id.eq(routes::view_id).and(
-                routes::pattern.eq(q_path)
-            )
-        )
-    ).limit(1)
-    .load(&pg_conn)
-    .expect("Error loading apps");
+    // let app_filter = apps::table.filter(apps::domain.eq(host_lower)).first::<App>(&pg_conn).unwrap();
+    // let mut results: Vec<(View, Route)> = View::belonging_to(&app_filter).inner_join(
+    //     routes::table.on(
+    //         views::id.eq(routes::view_id).and(
+    //             routes::pattern.eq(q_path)
+    //         )
+    //     )
+    // ).limit(1)
+    // .load(&pg_conn)
+    // .expect("Error loading apps");
 
-    // println!("PG result {:?}", results);
+    // // println!("PG result {:?}", results);
     
-    if results.len() > 0 {
-        let result = results.pop().unwrap();
-        return Some(result.0);
-    }
+    // if results.len() > 0 {
+    //     let result = results.pop().unwrap();
+    //     return Some(result.0);
+    // }
 
     return None;
 }
