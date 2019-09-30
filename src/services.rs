@@ -10,6 +10,7 @@ use diesel::result::Error as err;
 
 use crate::schema;
 use crate::models::*;
+use crate::js::exec_js;
 
 use hyper::header;
 use hyper::{Body, Request, Response, Server};
@@ -62,11 +63,11 @@ pub fn dispatch(view: View) -> Response<Body> {
         response.headers_mut().insert(header::CONTENT_TYPE, "text/html; charset=UTF-8".parse().unwrap());
         return response;
     } else if view.mime_type == "application/javascript" {
-        let mut response = Response::new(Body::from("JS"));
-        return response;
+        return exec_js(view);
     } else {
         // Should not happen
         let mut response = Response::new(Body::from("AppAssembly Server Error"));
         return response;
     }
 }
+

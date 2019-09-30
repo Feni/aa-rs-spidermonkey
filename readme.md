@@ -42,3 +42,9 @@ diesel migration generate create_routes
 diesel migration run
 ```
 
+Installing spidermonkey (mozjs) requires a few additional dependencies
+
+ERROR: Could not find autoconf 2.13
+sudo apt-get install autoconf2.13
+Version number is important
+
