@@ -1,19 +1,15 @@
-
+use actix_web::{HttpRequest, Responder, http::StatusCode};
 use diesel::query_builder::functions::sql_query;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
 use std::env;
 use diesel::sql_types::Text;
-
 use diesel::result::Error as err;
 
 use crate::schema;
 use crate::models::*;
 use crate::js::exec_js;
-
-use hyper::header;
-use hyper::{Body, Request, Response, Server};
 
 
 pub fn establish_connection() -> PgConnection {
@@ -57,17 +53,19 @@ pub fn resolve(q_method: String, q_host: String, q_path: String) -> Option<View>
     return None;
 }
 
-pub fn dispatch(view: View) -> Response<Body> {
+pub fn dispatch(view: View) -> impl Responder {
     if view.mime_type == "text/html" {
-        let mut response = Response::new(Body::from(view.content.unwrap()));
-        response.headers_mut().insert(header::CONTENT_TYPE, "text/html; charset=UTF-8".parse().unwrap());
-        return response;
+        // let mut response = Response::new(Body::from(view.content.unwrap()));
+        // response.headers_mut().insert(header::CONTENT_TYPE, "text/html; charset=UTF-8".parse().unwrap());
+        // return response;
+        return view.content.unwrap();
     } else if view.mime_type == "application/javascript" {
         return exec_js(view);
     } else {
         // Should not happen
-        let mut response = Response::new(Body::from("AppAssembly Server Error"));
-        return response;
+        // let mut response = Response::new(Body::from("AppAssembly Server Error"));
+        // return response;
+        return String::from("AppAssembly Server Error");
     }
 }
 

@@ -14,10 +14,11 @@ use mozjs::rust::Runtime;
 use mozjs::rust::SIMPLE_GLOBAL_CLASS;
 use std::ptr;
 use std::sync::Arc;
+use actix_web::{HttpRequest, Responder, http::StatusCode};
+
 
 
 use crate::models::View;
-use hyper::{Body, Request, Response, Server};
 use crate::timing::Timer;
 
 
@@ -25,7 +26,7 @@ use crate::timing::Timer;
 
 
 
-pub fn exec_js(view: View) -> Response<Body> {
+pub fn exec_js(view: View) -> String {
     println!("Exec js");
     let mut timer = Timer::new();
     let mut JSE: Arc<JSEngine> = JSEngine::init().unwrap();
@@ -56,6 +57,6 @@ pub fn exec_js(view: View) -> Response<Body> {
     }
 
 
-    let mut response = Response::new(Body::from("JS"));
-    return response;
+    // let mut response = Response::new(Body::from("JS"));
+    return String::from("From JS")
 }
