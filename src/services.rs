@@ -16,6 +16,8 @@ use crate::js::exec_js;
 use std::sync::Arc;
 use mozjs::rust::JSEngine;
 
+use actix_web::HttpResponse;
+use actix_web::dev::Body;
 
 
 
@@ -23,7 +25,7 @@ use mozjs::rust::JSEngine;
 pub struct AasmState {
     pub js: Arc<JSEngine>,
     pub id: i32,
-    pub conn: DBPool
+    pub db: DBPool
 }
 
 
@@ -49,7 +51,7 @@ pub fn establish_connection() -> DBPool {
 }
 
 
-pub fn resolve(q_method: String, q_host: String, q_path: String) -> Option<View> {
+pub fn resolve(pg_conn: &PgConnection, q_method: String, q_host: String, q_path: String) -> Option<View> {
     // use schema::apps::dsl::*;
     // use schema::routes::dsl::*;
     // use schema::views::dsl::*;
@@ -58,42 +60,43 @@ pub fn resolve(q_method: String, q_host: String, q_path: String) -> Option<View>
     println!("Method: {} host {} path {}", q_method, q_host, q_path);
     let host_lower = q_host.to_lowercase();
 
-    let pg_conn = establish_connection();
+    let app_filter = apps::table.filter(apps::domain.eq(host_lower)).first::<App>(pg_conn).unwrap();
+    let mut results: Vec<(View, Route)> = View::belonging_to(&app_filter).inner_join(
+        routes::table.on(
+            views::id.eq(routes::view_id).and(
+                routes::pattern.eq(q_path)
+            )
+        )
+    ).limit(1)
+    .load(pg_conn)
+    .expect("Error loading apps");
 
-    // let app_filter = apps::table.filter(apps::domain.eq(host_lower)).first::<App>(&pg_conn).unwrap();
-    // let mut results: Vec<(View, Route)> = View::belonging_to(&app_filter).inner_join(
-    //     routes::table.on(
-    //         views::id.eq(routes::view_id).and(
-    //             routes::pattern.eq(q_path)
-    //         )
-    //     )
-    // ).limit(1)
-    // .load(&pg_conn)
-    // .expect("Error loading apps");
-
-    // // println!("PG result {:?}", results);
+    // println!("PG result {:?}", results);
     
-    // if results.len() > 0 {
-    //     let result = results.pop().unwrap();
-    //     return Some(result.0);
-    // }
+    if results.len() > 0 {
+        let result = results.pop().unwrap();
+        return Some(result.0);
+    }
 
     return None;
 }
 
-pub fn dispatch(view: View) -> impl Responder {
+pub fn dispatch(view: View) -> HttpResponse {
     if view.mime_type == "text/html" {
-        // let mut response = Response::new(Body::from(view.content.unwrap()));
+        // let mut response = Response::new();
         // response.headers_mut().insert(header::CONTENT_TYPE, "text/html; charset=UTF-8".parse().unwrap());
         // return response;
-        return view.content.unwrap();
+        let content = view.content.unwrap();
+        return HttpResponse::with_body(StatusCode::OK, Body::from(content));
     } else if view.mime_type == "application/javascript" {
-        return exec_js(view);
+        let content = exec_js(view);
+        return HttpResponse::with_body(StatusCode::OK, Body::from(content))
     } else {
         // Should not happen
         // let mut response = Response::new(Body::from("AppAssembly Server Error"));
         // return response;
-        return String::from("AppAssembly Server Error");
+        // return String::from("AppAssembly Server Error");
+        return HttpResponse::with_body(StatusCode::OK, Body::from("AppAssembly Server Error"))
     }
 }
 
