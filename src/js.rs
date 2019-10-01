@@ -12,16 +12,22 @@ use mozjs::rust::JSEngine;
 use mozjs::jsapi::CompartmentOptions;
 use mozjs::rust::Runtime;
 use mozjs::rust::SIMPLE_GLOBAL_CLASS;
+use mozjs::rust::ToString;
 use std::ptr;
 use std::sync::Arc;
 use actix_web::{HttpRequest, Responder, http::StatusCode};
 
 
+use mozjs::rust::wrappers::JS_EncodeStringToUTF8;
+
 
 use crate::models::View;
 use crate::timing::Timer;
 
+use std::ffi::CStr;
+use std::str;
 
+use mozjs::conversions::jsstr_to_string;
 // pub static mut JSE: Arc<JSEngine> = JSEngine::init().unwrap();
 
 
@@ -44,15 +50,27 @@ pub fn exec_js(js: Arc<JSEngine>, view: View) -> String {
                                &CompartmentOptions::default())
         );
         timer.checkpoint("Global context");
+        let code = view.content.unwrap();
+        println!("Exec {}", &code);
 
         rooted!(in(cx) let mut rval = UndefinedValue());
-        rt.evaluate_script(global.handle(), "({ 'a': 7 })",
+        rt.evaluate_script(global.handle(), &code,
             "test", 1, rval.handle_mut());
 
         timer.checkpoint("Finish exec");
 
         println!("Returns object? {:?}", rval.is_object());
+
+        let mut jsstr = ToString(cx, rval.handle());
+        let rstr = jsstr_to_string(cx, jsstr);
+        println!("{}", &rstr);
+
+
+        // let mptr = JS_EncodeStringToUTF8(cx, rval.handle());
+        // let mstr = CStr::from_ptr(rstr);
         
+        // println!("{}", str::from_utf8(mstr.to_bytes()).unwrap());
+        // println!("{}", str::from_utf8(mstr.to_bytes()).unwrap());
 
     }
 
