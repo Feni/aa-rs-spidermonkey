@@ -45,10 +45,10 @@ fn serve(req: HttpRequest, data: AasmData) -> HttpResponse {
     let maybe_view = resolve(&pg_conn, method, host, path);
 
     if let Some(view) = maybe_view {
-        return dispatch(view);
+        return dispatch(view, data.js.clone());
     } else {
         // let mut response = Response::new(Body::from("Not Found"));
-        //let status = resp.status_mut();
+        // let status = resp.status_mut();
         // *response.status_mut() = StatusCode::NOT_FOUND;
         // return "Not Found";
         return HttpResponse::with_body(StatusCode::NOT_FOUND, Body::from("Not Found"))

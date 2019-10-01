@@ -26,12 +26,12 @@ use crate::timing::Timer;
 
 
 
-pub fn exec_js(view: View) -> String {
+pub fn exec_js(js: Arc<JSEngine>, view: View) -> String {
     println!("Exec js");
     let mut timer = Timer::new();
-    let mut JSE: Arc<JSEngine> = JSEngine::init().unwrap();
-    timer.checkpoint("Engine init");
-    let rt = Runtime::new(JSE);
+    // let mut JSE: Arc<JSEngine> = JSEngine::init().unwrap();
+    // timer.checkpoint("Engine init");
+    let rt = Runtime::new(js);
     timer.checkpoint("Runtime init");
     let cx = rt.cx();
     timer.checkpoint("Context init");

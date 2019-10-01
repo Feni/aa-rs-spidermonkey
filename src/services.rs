@@ -81,7 +81,7 @@ pub fn resolve(pg_conn: &PgConnection, q_method: String, q_host: String, q_path:
     return None;
 }
 
-pub fn dispatch(view: View) -> HttpResponse {
+pub fn dispatch(view: View, js: Arc<JSEngine>) -> HttpResponse {
     if view.mime_type == "text/html" {
         // let mut response = Response::new();
         // response.headers_mut().insert(header::CONTENT_TYPE, "text/html; charset=UTF-8".parse().unwrap());
@@ -89,7 +89,7 @@ pub fn dispatch(view: View) -> HttpResponse {
         let content = view.content.unwrap();
         return HttpResponse::with_body(StatusCode::OK, Body::from(content));
     } else if view.mime_type == "application/javascript" {
-        let content = exec_js(view);
+        let content = exec_js(js, view);
         return HttpResponse::with_body(StatusCode::OK, Body::from(content))
     } else {
         // Should not happen
