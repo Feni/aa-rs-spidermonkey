@@ -52,7 +52,6 @@ fn serve(req: HttpRequest, data: AasmData) -> HttpResponse {
         // *response.status_mut() = StatusCode::NOT_FOUND;
         // return "Not Found";
         return HttpResponse::with_body(StatusCode::NOT_FOUND, Body::from("Not Found"))
-
     }
 }
 

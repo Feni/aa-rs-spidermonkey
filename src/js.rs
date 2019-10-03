@@ -63,7 +63,7 @@ pub fn exec_js(js: Arc<JSEngine>, view: View) -> String {
 
         let mut jsstr = ToString(cx, rval.handle());
         let rstr = jsstr_to_string(cx, jsstr);
-        println!("{}", &rstr);
+        // println!("{}", &rstr);
 
 
         // let mptr = JS_EncodeStringToUTF8(cx, rval.handle());
@@ -72,9 +72,10 @@ pub fn exec_js(js: Arc<JSEngine>, view: View) -> String {
         // println!("{}", str::from_utf8(mstr.to_bytes()).unwrap());
         // println!("{}", str::from_utf8(mstr.to_bytes()).unwrap());
 
+        return String::from(&rstr);
     }
 
 
     // let mut response = Response::new(Body::from("JS"));
-    return String::from("From JS")
+    // return String::from("From JS")
 }

@@ -18,3 +18,5 @@ mozjs = "0.10.1"
 lazy_static = "1.4.0"
 actix-web = "1.0.8"
 r2d2 = "0.8"
+
+
